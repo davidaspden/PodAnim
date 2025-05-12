@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>FLIP</title>
+    <link rel="stylesheet" href="https://public.codepenassets.com/css/reset-2.0.min.css">
+    <style>
+        .timeline-container {
+            padding: 1em;
+        }
+
+        .timeline {
+            display: flex;
+            gap: 10px;
+            margin-top: 1em;
+            flex-direction: row;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 1em;
+        }
+
+        .item {
+            background: steelblue;
+            color: white;
+            padding: 1em;
+            border-radius: 5px;
+            flex: 1;
+            text-align: center;
+        }
+
+        .items {
+            background: red;
+            color: white;
+            padding: 1em;
+            border-radius: 5px;
+            flex: 1;
+            text-align: center;
+        }
+        .item:nth-last-child(1) {
+            background: green;
+        }
+        .size-6 {
+            background: red;
+            color: white;
+        }
+        .size-9 {
+            background: blue;
+            color: white;
+        }
+        .size-11 {
+            background: yellow;
+            color: black;
+        }
+        .size-14 {
+            background: orange;
+            color: black;
+        }
+        .size-18 {
+            background: purple;
+            color: white;
+        }
+
+
+
+    </style>
+
+
+
+
+</head>
+
+<body>
+    <div class="timeline-container">
+        <button id="add-btn">Add Item</button>
+        <button id="remove-btn">Remove Front Item</button>
+        <div class="timeline" id="timeline">
+            <!-- Items will go here -->
+        </div>
+    </div>
+
+    <script src='https://unpkg.com/gsap@3/dist/Flip.min.js'></script>
+    <script id="rendered-js" type="module">
+        import gsap from "https://esm.sh/gsap";
+
+        gsap.registerPlugin(Flip);
+
+        const timeline = document.getElementById('timeline');
+        const addBtn = document.getElementById('add-btn');
+        const removeBtn = document.getElementById('remove-btn');
+        var state = Flip.getState(".item");
+        const podSizes = [6,9,11,14,18.5];
+
+
+        let count = 1;
+
+        function disableButtons() {
+            addBtn.disabled = true;
+            removeBtn.disabled = true;
+        }
+        function enableButtons() {
+            addBtn.disabled = false;
+            removeBtn.disabled = false;
+        }
+
+        removeBtn.addEventListener("click", () => {
+            // disable buttons to prevent multiple clicks
+            disableButtons();
+            // snapshot everything
+            state = Flip.getState(".item");
+            // remove the first element
+            const firstItem = timeline.firstElementChild;
+            if (firstItem) {
+                timeline.removeChild(firstItem);
+            }
+
+            // run FLIP — animate only x, leave y untouched
+            Flip.from(state, {
+                duration: 0.7,
+                ease: "power1.inOut",
+                absolute: false,
+                scale:false,
+                stagger: 0.5,
+                y: false,
+                targets: ".item",
+
+                // optional: pop the new item in
+                onEnter: elements => {
+                    console.log("Hello"+elements);
+                    gsap.fromTo(elements,
+                        { scale: 0, opacity: 0.0 },
+                       { scale: 1, opacity: 1, duration: .5,delay: 1, ease: "expo.inOut(0.5)" }
+                    );
+                },
+                onLeave: elements => {
+                    console.log("Bye"+elements);
+                    gsap.to(elements, {
+                        scale: 0,
+                        opacity: 0.0,
+                        duration: .5,
+                        ease: "expo.inOut(0.5)",
+                        onComplete: () => {
+                            elements.forEach(element => element.remove());
+                        }
+                    });
+                },
+                onComplete: () => {
+                    // enable buttons after animation
+                    enableButtons();
+                    // log completion message
+                    console.log("Animation complete");
+                }
+            });
+            
+        });
+
+        addBtn.addEventListener("click", () => {
+            // disable buttons to prevent multiple clicks
+            disableButtons();
+            // snapshot everything
+            state = Flip.getState(".item");
+            // add the new element
+            const newItem = document.createElement("div");
+            newItem.className = "item";
+            newItem.classList.add(`size-${podSizes[Math.floor(Math.random() * podSizes.length)]}`);
+            newItem.textContent = `Pod ${count++}`;
+            timeline.appendChild(newItem);
+
+            // run FLIP — animate only x, leave y untouched
+            Flip.from(state, {
+                duration: 0.7,
+                ease: "power1.inOut",
+                absolute: false,
+                scale:false,
+                stagger: 0.2,
+                y: false,
+                targets: ".item",
+
+                // optional: pop the new item in
+                onEnter: elements => {
+                    console.log("Hello"+elements);
+                    gsap.fromTo(elements,
+                        { scale: 0, opacity: 0.0 },
+                       { scale: 1, opacity: 1, duration: .5,delay: 1, ease: "expo.inOut(0.5)" }
+                    );
+                },
+                onLeave: elements => {
+                    console.log("Bye"+elements);
+                    gsap.to(elements, {
+                        scale: 0,
+                        opacity: 0.0,
+                        duration: .5,
+                        ease: "expo.inOut(0.5)",
+                        onComplete: () => {
+                            // enable buttons after animation
+                    enableButtons();
+                            elements.forEach(element => element.remove());
+                        }
+                    });
+                },
+                onComplete: () => {
+                      // enable buttons after animation
+                    enableButtons();
+                    // log completion message
+                    console.log("Animation complete");
+                }
+            });
+            
+        });
+    </script>
+
+
+</body>
+
+</html>

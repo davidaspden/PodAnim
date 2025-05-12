@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+
+# optional npm cache
+.npm
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# environment files
+.env
+
+# build outputs
+dist/
+build/
+
+# VSCode workspace settings
+.vscode/
