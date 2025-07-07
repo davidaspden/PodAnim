@@ -3,11 +3,65 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>FLIP</title>
+    <title>FLIP - Prototype Pod Availability System</title>
     <link rel="stylesheet" href="https://public.codepenassets.com/css/reset-2.0.min.css">
+    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A prototype for a pod availability system using GSAP's FLIP plugin. This interactive demo showcases the animation of adding and removing pods with visual indicators for readiness.">
+    <meta name="keywords" content="GSAP, FLIP, animation, prototype, pod availability system, interactive demo">
     <style>
+        
+        *,
+*::after,
+*::before {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+
+
+}
+        @import url('https://fonts.cdnfonts.com/css/amazon-ember');
+
+       
+
+        :root {
+            --clr-1: #6420aa;
+            --clr-2: #0843b8;
+            --clr-3: #12d0a7;
+        }
+
+        html {
+            height: 100vh;
+        }
+
+        
+
+        .header h1 {
+            font-family: 'Amazon Ember', sans-serif;
+            text-align: left;
+            color: #ffffff;
+            font-size: 2em;
+            font-weight: 800;
+            margin-top: 0.5em;
+            margin-bottom: 1em;
+        }
+
+        body {
+            font-family: sans-serif;
+            background-image: linear-gradient(to top, #30cfd0 0%, #330867 100%);
+            color: #ffffff;
+            padding: 2em;
+            background-repeat: no-repeat;
+        }
+
+
         .timeline-container {
+            position: relative;
             padding: 1em;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow: hidden;
+            z-index: 3
         }
 
         .timeline {
@@ -17,81 +71,271 @@
             flex-direction: row;
             border-bottom: 1px solid #ccc;
             padding-bottom: 1em;
+            position : relative;
+            z-index: 2;
         }
 
+        
         .item {
+            box-sizing: border-box;
             background: steelblue;
             color: white;
-            padding: 1em;
+            padding: .2em;
             border-radius: 5px;
             flex: 1;
             text-align: center;
+            z-index: 1;
+            position: relative;
+            cursor: pointer;
+          
         }
 
-        .items {
-            background: red;
-            color: white;
-            padding: 1em;
-            border-radius: 5px;
-            flex: 1;
-            text-align: center;
+        .innerItem {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            width: 100%;
+            font-size: 1.2em;
+            font-weight: bold;
+            box-sizing: border-box;
+            position: relative
         }
+
+        
+
+        .ready {
+            z-index: 1;
+            border: 2px solid #000000;
+        }
+
+        .ready::after {
+            filter: blur(3rem);
+        }
+
+        .ready::after,
+        .ready::before {
+            content: " ";
+            position: absolute;
+            z-index: -1;
+            inset: -0.1rem;
+            background: conic-gradient(from var(--gradient-angle),
+                    var(--clr-1),
+                    var(--clr-2),
+                    var(--clr-3),
+                    var(--clr-2),
+                    var(--clr-1));
+            border-radius: inherit;
+            animation: rotate 2.5s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% {
+                --gradient-angle: 0deg;
+            }
+
+            100% {
+                --gradient-angle: 360deg;
+            }
+        }
+
         .item:nth-last-child(1) {
-            background: green;
+            border: 1px solid white;
         }
+
         .size-6 {
-            background: red;
+            background-color: red;
             color: white;
         }
+
         .size-9 {
-            background: blue;
+            background-color: blue;
             color: white;
         }
+
         .size-11 {
-            background: yellow;
+            background-color: yellow;
             color: black;
         }
+
         .size-14 {
-            background: orange;
+            background-color: orange;
             color: black;
         }
-        .size-18 {
-            background: purple;
+
+        .size-18-5 {
+            background-color: purple;
             color: white;
         }
 
+        .initHide {
+            visibility: hidden;
+        }
 
+        .timeReading {
+            display: flex;
+            gap: 10px;
+            margin-top: 1em;
+            flex-direction: row;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 1em;
+            justify-content: space-between;
+            font-size: 0.6em;
+        }
 
+        .timeReading div {
+            background: rgb(1, 29, 53);
+            color: white;
+            padding: 1em;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        #Debug {
+            box-sizing: border-box;
+            margin-top: 1em;
+            padding: 1em;
+            background: #000;
+            color: #197906;
+            border-radius: 5px;
+            bottom: 0;
+            position: relative;
+            width: 100%;
+        }
+
+        #Debug h2 {
+            font-family: 'Amazon Ember', sans-serif;
+            text-align: left;
+            color: #ffffff;
+            font-size: 1.5em;
+            font-weight: 800;
+            margin-top: 0.5em;
+            margin-bottom: 1em;
+        }
     </style>
-
-
-
-
 </head>
 
 <body>
+    <div class="header">
+        <h1>POD-INFO UI ANIMATION PROTOTYPE</h1>
+    </div>
     <div class="timeline-container">
-        <button id="add-btn">Add Item</button>
-        <button id="remove-btn">Remove Front Item</button>
+        <button id="add-btn">Add Pod</button>
+        <button id="remove-btn">Remove Front Pod</button>
+        <button id="simulation-btn">Floor Simulation</button>
         <div class="timeline" id="timeline">
             <!-- Items will go here -->
         </div>
+        <div class="timeReading" id="timeReading">
+            <div id="timeFirst">1 sec</div>
+            <div id="timeLast">2 min</div>
+        </div>
+    </div>
+    <div id="Debug">
+        <h2>Debug</h2>
+        <div id="DebugData"></div>
+        <div id="counter"> </div>
     </div>
 
+
+     <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/GSDevTools.min.js"></script>
+    
     <script src='https://unpkg.com/gsap@3/dist/Flip.min.js'></script>
     <script id="rendered-js" type="module">
         import gsap from "https://esm.sh/gsap";
 
         gsap.registerPlugin(Flip);
 
+        gsap.registerPlugin(GSDevTools);
+        GSDevTools.create();
+
         const timeline = document.getElementById('timeline');
         const addBtn = document.getElementById('add-btn');
         const removeBtn = document.getElementById('remove-btn');
-        var state = Flip.getState(".item");
-        const podSizes = [6,9,11,14,18.5];
+        const podSizes = ["6","9", "11", "14", "18-5"];
+        let addInterval = null;
+        let podList = [];
+        removeBtn.disabled = true;
+        var counter = 1;
+
+        //Simulation of a system sending pods
+        setInterval(() => {
+            counter++;
+            document.getElementById("counter").innerHTML = `Counter: ${counter}`;
+            if (podList.length > 0) {
+                podList.forEach(pod => {
+                    pod.time -= 1;
+                    if (pod.time <= 0) {
+                        //Give visual indicator that pod is ready
+                        document.getElementById(pod.id).classList.add("ready");
+                        pod.time = 0;
+                    }
+                });
+                showDebugData()
+                updateTimeReading()
+            }
+        }, 1000);
+
+        function add() {
+            if (timeline.children.length < 7) {
+                addBtn.click();
+            }
+        }
+
+        function showDebugData() {
+            const debugData = document.getElementById("DebugData");
+            debugData.innerHTML = "";
+            podList.forEach(pod => {
+                const div = document.createElement("div");
+                div.textContent = `Name: ${pod.name}, Size: ${pod.size}, Time: ${pod.time}`;
+                debugData.appendChild(div);
+            });
+        }
+
+        function startAddInterval() {
+            if (!addInterval) {
+                addInterval = setInterval(() => {
+                    if (timeline.children.length < 7) {
+                        add();
+                    }
+                }, 1000);
+            }
+        }
+
+        function pauseAddInterval() {
+            if (addInterval) {
+                clearInterval(addInterval);
+                addInterval = null;
+            }
+        }
+
+        // Add event listener to the simulation button
+        const simulationBtn = document.getElementById('simulation-btn');
+        simulationBtn.addEventListener('click', () => {
+            if (simulationBtn.textContent === 'Floor Simulation') {
+                simulationBtn.textContent = 'Stop Floor Simulation';
+                startAddInterval();
+            } else {
+                simulationBtn.textContent = 'Floor Simulation';
+                pauseAddInterval();
+            }
+        });
 
 
         let count = 1;
+
+        function secondsToMinutes(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            // Calculate the remaining seconds
+            // using the modulo operator
+            const remainingSeconds = seconds % 60;
+            if (minutes > 0 && remainingSeconds % 30 !== 0) {
+                // Round down to nearest 30 seconds
+                const roundedSeconds = remainingSeconds < 30 ? 0 : 30;
+                return `${minutes}:${roundedSeconds === 0 ? '00' : '30'}`;
+            }
+            return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+        }
 
         function disableButtons() {
             addBtn.disabled = true;
@@ -102,113 +346,199 @@
             removeBtn.disabled = false;
         }
 
+        function podListMaxTime() {
+            let maxTime = 0;
+            if (podList.length >= 0 && podList.length <= 2) {
+                maxTime = podList[0].time;
+            }
+
+            else {
+                podList.forEach(pod => {
+                    maxTime += pod.time;
+                });
+
+            }
+            return maxTime;
+        }
+
+        function updateTimeReading() {
+            if (podList.length > 0) {
+                document.getElementById("timeFirst").innerHTML = secondsToMinutes(podList[0].time);
+                document.getElementById("timeLast").innerHTML = secondsToMinutes(podListMaxTime());
+            } else {
+                console.log("Pod list is empty");
+            }
+        }
+
+        // Add event listener to the remove button
+
         removeBtn.addEventListener("click", () => {
             // disable buttons to prevent multiple clicks
             disableButtons();
-            // snapshot everything
-            state = Flip.getState(".item");
-            // remove the first element
+            console.log("--- Remove Button Clicked ---");
+
+
             const firstItem = timeline.firstElementChild;
-            if (firstItem) {
-                timeline.removeChild(firstItem);
+            if (!firstItem) {
+                console.log("No firstItem to remove from DOM.");
+                enableButtons();
+                return;
             }
+            console.log("Attempting to remove this element:", firstItem, "Its classes:", firstItem.classList.toString());
 
-            // run FLIP — animate only x, leave y untouched
-            Flip.from(state, {
-                duration: 0.7,
-                ease: "power1.inOut",
-                absolute: false,
-                scale:false,
-                stagger: 0.5,
-                y: false,
-                targets: ".item",
 
-                // optional: pop the new item in
-                onEnter: elements => {
-                    console.log("Hello"+elements);
-                    gsap.fromTo(elements,
-                        { scale: 0, opacity: 0.0 },
-                       { scale: 1, opacity: 1, duration: .5,delay: 1, ease: "expo.inOut(0.5)" }
-                    );
-                },
-                onLeave: elements => {
-                    console.log("Bye"+elements);
-                    gsap.to(elements, {
-                        scale: 0,
-                        opacity: 0.0,
-                        duration: .5,
-                        ease: "expo.inOut(0.5)",
-                        onComplete: () => {
-                            elements.forEach(element => element.remove());
-                        }
-                    });
+            gsap.to(firstItem, {
+                scale: 0,
+                opacity: 0.0,
+                duration: 1.5,
+                ease: "expo.inOut(0.5)",
+                onStart: () => {
+                    console.log("Start of Remove Animation");
                 },
                 onComplete: () => {
-                    // enable buttons after animation
-                    enableButtons();
-                    // log completion message
-                    console.log("Animation complete");
+                    if (podList.length > 0) {
+                        const removedPodData = podList.shift(); // Remove from the front of the data array
+                        console.log("Removed from podList (front):", removedPodData);
+                    }
+                    showDebugData();
+                    let state = Flip.getState(".item");
+                    timeline.removeChild(firstItem);
+                    // snapshot everything
+
+                    console.log("State captured. Number of targets in state:", state.targets ? state.targets.length : 0);
+                    if (state.targets && firstItem) {
+                        const isFirstItemInState = Array.from(state.targets).includes(firstItem);
+                        console.log("Was the 'firstItem' (to be removed) found in the captured state?", isFirstItemInState);
+                        if (!isFirstItemInState) {
+                            console.error("CRITICAL: The element to be removed was NOT found in the state captured by Flip.getState('.item'). This is likely why onLeave isn't firing. Check if 'firstItem' has the '.item' class when state is captured.");
+                        }
+                    } else if (!firstItem) {
+                        console.warn("firstItem was null when trying to check its presence in state.");
+                    }
+
+                    console.log("'firstItem' has been removed from the DOM. Timeline children count:", timeline.children.length);
+                    // The 'void timeline.offsetWidth;' line forces a browser reflow.
+                    // It's generally not necessary with Flip and can be removed, but it shouldn't break onLeave.
+                    void timeline.offsetWidth;
+
+                    // run FLIP — animate only x, leave y untouched
+                    Flip.from(state, {
+                        duration: 1,
+                        ease: "power1.inOut",
+                        absolute: false,
+                        scale: false,
+                        stagger: 0.5,
+                        y: false,
+
+                        targets: ".item",
+                        //Final animation cleanup
+                        onComplete: () => {
+                            // enable buttons after animation
+                            enableButtons();
+                            // log completion message
+                            console.log("All Remove Animation complete");
+
+                        }
+                    });
+
+                    updateTimeReading();
                 }
             });
-            
+
+
+
         });
+
+        // Add event listener to the add button
 
         addBtn.addEventListener("click", () => {
             // disable buttons to prevent multiple clicks
             disableButtons();
             // snapshot everything
-            state = Flip.getState(".item");
+            var state = Flip.getState(".item", {
+                props: "x,width,inline-size",
+                simple: true,
+            });
+            console.log(state);
+            //Pause the animation
+            void timeline.offsetWidth;
             // add the new element
             const newItem = document.createElement("div");
+            const newInner = document.createElement("div");
             newItem.className = "item";
-            newItem.classList.add(`size-${podSizes[Math.floor(Math.random() * podSizes.length)]}`);
-            newItem.textContent = `Pod ${count++}`;
+            const randomSizeValue = podSizes[Math.floor(Math.random() * podSizes.length)];
+            const sizeClass = `size-${randomSizeValue}`;
+            newInner.classList.add(sizeClass);
+            newInner.textContent = `Pod ${count++}`;
+            newInner.classList.add("innerItem"); 
+            newItem.id = `pod-${count}`; // Assign a unique ID to the new pod
+            newItem.appendChild(newInner);
+            newItem.classList.add("initHide"); // Add the class to hide it initially
             timeline.appendChild(newItem);
 
+            //now we need to set the overall state of pod
+            const newPodData = {
+                id: newItem.id,
+                name: newItem.textContent,
+                size: sizeClass, // Store the actual class name
+                time: Math.floor(Math.random() * 30) + 1
+            };
+            podList.push(newPodData); // Add data to the end of the array
+            console.log("Add Updated podList:", podList); // For debugging
+            // Update the time reading
+            updateTimeReading();
+            showDebugData()
+
+
+            //take control of the rendering and pause the animation
+            void timeline.offsetWidth;
+            var existingItems = state.targets ? state.targets.length : 0;
+            var duration = 0.7;
+            var stagger = 0.2;
+            var delay = 0;
+            // Calculate delay based on existing items
+            if (existingItems > 0) {
+                delay = (existingItems - 1) * stagger + duration
+            }
             // run FLIP — animate only x, leave y untouched
             Flip.from(state, {
-                duration: 0.7,
-                ease: "power1.inOut",
+                duration: duration,
+                ease: "expo.inOut(0.8)",
                 absolute: false,
-                scale:false,
-                stagger: 0.2,
+                scale: false,
+                stagger: stagger,
                 y: false,
+                nested: false,
+                id: "addAnimation",
                 targets: ".item",
 
                 // optional: pop the new item in
                 onEnter: elements => {
-                    console.log("Hello"+elements);
-                    gsap.fromTo(elements,
-                        { scale: 0, opacity: 0.0 },
-                       { scale: 1, opacity: 1, duration: .5,delay: 1, ease: "expo.inOut(0.5)" }
+                    console.log("Entering elements:", Array.from(elements));
+                    gsap.set(elements, { scale: 0, opacity: 0.0 });
+                    elements.forEach(element => {
+                        element.classList.remove("initHide");
+                    });
+
+                    gsap.to(elements,
+                        { scale: 1, opacity: 1, duration: 3, delay: 2, ease: "expo.inOut(0.5)" }
                     );
                 },
-                onLeave: elements => {
-                    console.log("Bye"+elements);
-                    gsap.to(elements, {
-                        scale: 0,
-                        opacity: 0.0,
-                        duration: .5,
-                        ease: "expo.inOut(0.5)",
-                        onComplete: () => {
-                            // enable buttons after animation
-                    enableButtons();
-                            elements.forEach(element => element.remove());
-                        }
-                    });
+                onStart: () => {
+                    console.log("Start of Add");
+
                 },
                 onComplete: () => {
-                      // enable buttons after animation
+                    // enable buttons after animation
                     enableButtons();
                     // log completion message
-                    console.log("Animation complete");
+                    console.log("All Add Animations complete");
                 }
             });
-            
+           GSDevTools.create();
+
         });
     </script>
-
-
 </body>
 
 </html>

@@ -1,0 +1,6 @@
+ @property --gradient-angle {
+            syntax: "<angle>";
+            inherits: false;
+            initial-value: 90deg;
+          
+        }
